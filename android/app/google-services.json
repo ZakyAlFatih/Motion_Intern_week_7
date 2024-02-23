@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "583964929039",
+    "project_id": "motion-todolist-94de3",
+    "storage_bucket": "motion-todolist-94de3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:583964929039:android:1a1f6e1a60c96688de477a",
+        "android_client_info": {
+          "package_name": "com.example.motion_flutter_firebase"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDAj0p_w_q29Dzpk2-cYRBfPdauaFNvnUk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

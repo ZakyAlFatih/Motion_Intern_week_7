@@ -1,6 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(MyApp());
 }
 
@@ -11,13 +18,29 @@ class MyApp extends StatelessWidget {
   final _textEditingController = TextEditingController();
 
   // Fungsi akan dipanggil ketika tombol 'tambah todo' ditekan
-  void handleCreateTodo() {}
+  void handleCreateTodo() {
+    final newTodo = {
+      "name": _textEditingController.text,
+      "status": false,
+      'timestamp': Timestamp.now()
+    };
+    FirebaseFirestore.instance.collection('todo').doc().set(newTodo);
+    _textEditingController.text = "";
+  }
 
   // Fungsi akan dipanggil ketika todo di checklist/unchecklist
-  void handleToggleTodo(String id, bool status) {}
+  void handleToggleTodo(String id, bool status) {
+    final updatedData = {
+      'status': !status,
+    };
+
+    FirebaseFirestore.instance.collection('todo').doc(id).update(updatedData);
+  }
 
   // Fungsi akan dipanggil ketika menghapus salah satu todo
-  void handleDeleteTodo(String id) {}
+  void handleDeleteTodo(String id) {
+    FirebaseFirestore.instance.collection('todo').doc(id).delete();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,36 +68,35 @@ class MyApp extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 20),
-                          Column(
-                            children: [
-                              // Todo Item
-                              TodoItemWidget(
-                                id: "1",
-                                name: "Ini todo pertama",
-                                status: true,
-                                onDelete: (id) {
-                                  handleDeleteTodo(id);
-                                },
-                                onToggle: (id, status) {
-                                  handleToggleTodo(id, status);
-                                },
-                              ),
-                              TodoItemWidget(
-                                id: "2",
-                                name: "Ini todo kedua",
-                                status: false,
-                                onDelete: (id) {
-                                  handleDeleteTodo(id);
-                                },
-                                onToggle: (id, status) {
-                                  handleToggleTodo(id, status);
-                                },
-                              ),
-                            ],
+                          StreamBuilder(
+                            stream: FirebaseFirestore.instance
+                                .collection('todo')
+                                .orderBy('timestamp', descending: true)
+                                .snapshots(),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return Text("Please wait...");
+                              }
+                              if (snapshot.hasData == false) {
+                                return Text("No data!");
+                              }
+                              return Column(
+                                children: [
+                                  for (var document in snapshot.data!.docs)
+                                    TodoItemWidget(
+                                        id: document.id,
+                                        name: document.data()['name'],
+                                        status: document.data()['status'],
+                                        onDelete: handleDeleteTodo,
+                                        onToggle: handleToggleTodo)
+                                ],
+                              );
+                            },
                           ),
                         ],
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
